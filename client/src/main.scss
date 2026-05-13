@@ -1,0 +1,22 @@
+@use 'styles/mixins' as *;
+
+.container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+  @include responsive('small') {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  @include responsive('tablet') {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+
+  @include responsive('desktop') {
+    padding-left: 8rem;
+    padding-right: 8rem;
+  }
+
+}

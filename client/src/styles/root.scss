@@ -1,0 +1,12 @@
+@use 'mixins' as *;
+@use 'functions' as *;
+
+* {
+    margin: 0px;
+
+    body {
+        @include main-font;
+        overflow-x: hidden;
+        background-color: colorMap(backdrop);
+    }
+}

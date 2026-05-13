@@ -1,0 +1,124 @@
+@use 'sass:map';
+@use 'sass:string';
+@use 'variables' as *;
+
+@mixin main-font {
+    font-family: 'Outfit Variable', sans-serif;
+}
+
+@mixin secondary-font {
+    font-family: 'Comfortaa Variable', system-ui;
+}
+
+// Responsive mixin with named breakpoints
+@mixin response($min: null, $max: null) {
+
+    $min-value: null;
+    @if ($min != (null)) {
+        $min-value: map.get($breakpoints, $min);
+    }
+
+    $max-value: null;
+    @if ($max != (null)) {
+        $max-value: map.get($breakpoints, $max);
+    }
+
+    @if ($min-value and $max-value) {
+        @media (min-width: #{$min-value}) and (max-width: #{$max-value}) {
+            @content;
+        }
+    } @else if ($min-value) {
+        @media (min-width: #{$min-value}) {
+            @content;
+        }
+    } @else if ($max-value) {
+        @media (max-width: #{$max-value}) {
+            @content;
+        }
+    } @else {
+        @warn ("⚠️ Provide at least one valid breakpoint name.");
+    }
+}
+
+// Responsive mixin with raw pixel values and/or named breakpoints
+@mixin responsive($min: null, $max: null) {
+
+    $min-value: null;
+    @if ($min != (null)) {
+        @if (string.index(#{$min}, 'px') or string.index(#{$min}, '%')) {
+            $min-value: $min;
+        } @else {
+            $min-value: map.get($breakpoints, $min);
+        }
+    }
+
+    $max-value: null;
+    @if ($max != (null)) {
+        @if (string.index(#{$max}, 'px') or string.index(#{$max}, '%')) {
+            $max-value: $max;
+        } @else {
+            $max-value: map.get($breakpoints, $max);
+        }
+    }
+
+    @if ($min-value and $max-value) {
+        @media (min-width: #{$min-value}) and (max-width: #{$max-value}) {
+            @content;
+        }
+    } @else if ($min-value) {
+        @media (min-width: #{$min-value}) {
+            @content;
+        }
+    } @else if ($max-value) {
+        @media (max-width: #{$max-value}) {
+            @content;
+        }
+    } @else {
+        @warn ("⚠️ Provide at least one valid breakpoint name or pixel value.");
+    }
+}
+
+// Responsive mixin with orientation support
+@mixin response-orient($min: null, $max: null, $orientation: null) {
+
+    $min-value: null;
+    @if ($min != (null)) {
+        @if (string.index(#{$min}, 'px') or string.index(#{$min}, '%')) {
+            $min-value: $min;
+        } @else {
+            $min-value: map.get($breakpoints, $min);
+        }
+    }
+
+    $max-value: null;
+    @if ($max != (null)) {
+        @if (string.index(#{$max}, 'px') or string.index(#{$max}, '%')) {
+            $max-value: $max;
+        } @else {
+            $max-value: map.get($breakpoints, $max);
+        }
+    }
+
+    $query: ('');
+
+    @if ($min-value) {
+        $query: ('#{$query} and (min-width: #{$min-value})');
+    }
+
+    @if ($max-value) {
+        $query: ('#{$query} and (max-width: #{$max-value})');
+    }
+
+    @if ($orientation) {
+        $query: ('#{$query} and (orientation: #{$orientation})');
+    }
+
+    @if ($query != ('')) {
+        $query: string.slice($query, 6);
+        @media (#{$query}) {
+            @content;
+        }
+    } @else {
+        @warn ("⚠️ Provide at least one of min, max, or orientation.");
+    }
+}
