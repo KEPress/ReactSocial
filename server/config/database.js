@@ -1,12 +1,12 @@
-const { connect } = require('mongoose')
+const { connect, connection } = require('mongoose')
 
-const connection = async () => {
+const database_connect = async () => {
     try {
-        mongoose.connection.on('connected', () => console.log('Database connected'))
+        connection.on('connected', () => console.log('Database connected'))
         await connect(`${process.env.MONGO_URI}/reactsocial`)
     } catch (error) {
         console.error(error.message)
     } //end try-catch
 }
 
-module.exports = { connection }
+module.exports = { database_connect }
