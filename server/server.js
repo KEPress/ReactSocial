@@ -1,10 +1,9 @@
-require('module-alias/register')
 const express = require('express')
 const cors = require('cors')
 const { setServers } = require('dns')
 const { serve } = require('inngest/express')
-const { database_connect } = require('config/database')
-const { inngest, functions } = require('middleware/injest')
+const { database_connect } = require('./config/database')
+const { inngest, functions } = require('./middleware/injest')
 
 setServers(Array('8.8.8.8', '8.8.4.4'))
 

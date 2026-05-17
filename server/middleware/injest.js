@@ -1,5 +1,5 @@
 const { Inngest } = require('inngest')
-const { UserModel } = require('models/user.model')
+const { UserModel } = require('../models/user.model')
 
 const inngest = new Inngest({ id: 'reactsocial' })
 

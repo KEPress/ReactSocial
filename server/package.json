@@ -15,17 +15,8 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "inngest": "^4.3.0",
-    "module-alias": "^2.3.4",
     "mongoose": "^9.6.2",
     "multer": "^2.1.1"
-  },
-  "_moduleAliases": {
-    "config": "config",
-    "models": "models",
-    "controllers": "controllers",
-    "routers": "routers",
-    "middleware": "middleware",
-    "utilities": "utilities"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
