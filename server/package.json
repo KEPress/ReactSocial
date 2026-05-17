@@ -20,12 +20,12 @@
     "multer": "^2.1.1"
   },
   "_moduleAliases": {
-    "config": "./config",
-    "models": "./models",
-    "controllers": "./controllers",
-    "routers": "./routers",
-    "middleware": "./middleware",
-    "utilities": "./utilities"
+    "config": "config",
+    "models": "models",
+    "controllers": "controllers",
+    "routers": "routers",
+    "middleware": "middleware",
+    "utilities": "utilities"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
