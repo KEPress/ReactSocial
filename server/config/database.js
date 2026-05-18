@@ -8,7 +8,7 @@ const database_connect = async () => {
 
     try {
         connection.on('connected', () => console.log('Database connected'))
-        await connect(`${process.env.MONGO_URI}/reactsocial`)
+        await connect(process.env.MONGO_URI)
         isConnected = true
     } catch (error) {
         console.error(error.message)
