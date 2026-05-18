@@ -13,14 +13,14 @@ const syncUserCreation = inngest.createFunction(
         //Check availability of username
         const user = await UserModel.findOne({ username: username })
         if (user) username = username + Math.floor(Math.random() * 10000)
-        const userData = ({
+        const userData = await UserModel.create({
             _id: id, email: email_addresses[0].email_address,
             full_name: (first_name + (" ") + last_name),
             profile_picture: image_url,
             username 
         })
         
-        await UserModel.create(userData)
+        return(userData)
     } //end function
 )
 
