@@ -3,18 +3,23 @@ const { connect, connection } = require('mongoose')
 
 
 const database_connect = async () => {
-    
     if (connection.readyState === (1)) return
 
+    // Wait for connection to complete if currently connecting
+    if (connection.readyState === (2)) {
+        await new Promise((resolve) => connection.once('connected', resolve))
+        return
+    } //end if
+
     try {
-        connection.on('connected', () => console.log('Database connected'))
         await connect(process.env.MONGO_URI, {
             serverSelectionTimeoutMS: 30000,
             socketTimeoutMS: 45000,
-            bufferCommands: false
-         })
+        })
+        console.log('Database connected')
     } catch (error) {
-        console.error(error.message)
+        console.error('Database connection error:', error.message)
+        throw error
     } //end try-catch
 }
 
