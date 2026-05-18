@@ -1,5 +1,6 @@
 const { Inngest } = require('inngest')
 const { UserModel } = require('../models/user.model')
+const { database_connect } = require('../config/database')
 
 const inngest = new Inngest({ id: 'reactsocial' })
 
@@ -7,6 +8,7 @@ const inngest = new Inngest({ id: 'reactsocial' })
 const syncUserCreation = inngest.createFunction(
     { id: 'sync-user-from-clerk', triggers: [{ event: 'clerk/user.created' }] },
     async ({ event }) => {
+        await database_connect()
         const { id, first_name, last_name, email_addresses, image_url } = event.data
         let username = email_addresses[0].email_address.split('@')[0]
 
@@ -28,6 +30,7 @@ const syncUserCreation = inngest.createFunction(
 const syncUserUpdate = inngest.createFunction(
     { id: 'update-user-from-clerk', triggers: [{ event: 'clerk/user.updated' }] },
     async ({ event }) => {
+        await database_connect()
         const { id, first_name, last_name, email_addresses, image_url } = event.data
 
         const updateUserData = ({
@@ -45,6 +48,7 @@ const syncUserUpdate = inngest.createFunction(
 const syncUserDeletion = inngest.createFunction(
     { id: 'delete-user-with-clerk', triggers: [{ event: 'clerk/user.deleted' }] },
     async ({ event }) => {
+        await database_connect()
         const { id } = event.data
         await UserModel.findByIdAndDelete(id)
     }
