@@ -1,8 +1,6 @@
 const { readFileSync } = require('fs')
 const { imagekit } = require('../middleware/imagekit')
 const { UserModel } = require('../models/user.model');
-const { request } = require('http');
-
 
 //Get User Data using User Id
 exports.getUserData = async (request, response, next) => {

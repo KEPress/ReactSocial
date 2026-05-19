@@ -13,4 +13,4 @@ router.post(`/follow`, protect, followUser)
 
 router.post(`/unfollow`, protect, unfollowUser)
 
-exports.userRoute= router
+exports.userRoute = router
