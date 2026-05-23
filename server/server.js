@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const { setServers } = require('dns')
 const { serve } = require('inngest/express')
-const { clerkMiddleware } = require('@clerk/express')
+const { clerkMiddleware, getAuth } = require('@clerk/express')
 const { database_connect } = require('./config/database')
 const { userRoute } = require('./router/user.route')
 const { inngest, functions } = require('./middleware/injest')
@@ -19,7 +19,7 @@ application.get(`/`, (request, response) => response.send('Server is online'))
 application.use(`/api/inngest`, serve({ client: inngest, functions }))
 application.use(`/api/user`, userRoute)
 
-const PORT = (process.env.PORT || (5000))
+const PORT = (process.env.PORT || (4000))
 
 database_connect().then(() => {
     application.listen(PORT, () => console.log(`Server is running on: ${PORT}`))

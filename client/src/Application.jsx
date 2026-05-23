@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { Routes, Route } from 'react-router-dom'
-import { useUser } from '@clerk/react'
+import { useUser, useAuth } from '@clerk/react'
 import { Layout } from '@pages/Layout'
 import { Login } from '@pages/Login'
 import { Feed } from '@pages/Feed'
@@ -16,6 +16,12 @@ import { CreatePost } from '@pages/CreatePost'
 export const Application = () => {
 
   const { user } = useUser()
+
+  const { getToken } = useAuth()
+
+  useEffect(() => {
+    if (user) getToken().then((token) => (console.log(token)))
+  }, [user, getToken])
 
   return (<React.Fragment>
             <Toaster />
