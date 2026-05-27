@@ -1,12 +1,13 @@
 const { readFileSync } = require('fs')
+const { getAuth } = require('@clerk/express')
 const { imagekit } = require('../middleware/imagekit')
-const { UserModel } = require('../models/user.model');
+const { UserModel } = require('../models/user.model')
 
 //Get User Data using User Id
 exports.getUserData = async (request, response, next) => {
 
     try {
-        const { userId } = request.auth()
+        const { userId } = getAuth(request)
         const user = await UserModel.findById(userId)
         if (!user) return response.json({ success: false,  message: ('User not found') })
         response.json({ success: true, user })    
@@ -21,14 +22,14 @@ exports.getUserData = async (request, response, next) => {
 exports.updateUserData = async (request, response, next) => {
 
     try {
-        const { userId } = request.auth()
-        const { username, bio, location, full_name } = request.body
+        const { userId } = getAuth(request)
+        let { username, bio, location, full_name } = request.body
         
         const userData = await UserModel.findById(userId)
         (!username && (username = userData.username ))
 
         if (userData.username !== (username)) {
-            const user = UserModel.findOne({ username })
+            const user = await UserModel.findOne({ username })
             //will not change username if username already in use
             if (user) username = userData.username
         } //end if
@@ -88,7 +89,7 @@ exports.updateUserData = async (request, response, next) => {
 exports.locateUsers = async (request, response, next) => {
 
     try {
-        const { userId } = request.auth()
+        const { userId } = getAuth(request)
         const { input } = request.body
 
         const users = await UserModel.find({
@@ -111,7 +112,7 @@ exports.locateUsers = async (request, response, next) => {
 exports.followUser = async (request, response, next) => {
 
     try {
-        const { userId } = request.auth()
+        const { userId } = getAuth(request)
         const { id } = request.body
         const user = await UserModel.findById(userId)
 
@@ -139,7 +140,7 @@ exports.followUser = async (request, response, next) => {
 exports.unfollowUser = async (request, response, next) => {
 
     try {
-        const { userId } = request.auth()
+        const { userId } = getAuth(request)
         const { id } = request.body
 
         const user = await UserModel.findById(userId)
