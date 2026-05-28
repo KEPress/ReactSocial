@@ -19,7 +19,6 @@ exports.getUserData = async (request, response, next) => {
 
 
 //Update User Data
-//Update User Data
 exports.updateUserData = async (request, response, next) => {
 
     try {
@@ -28,16 +27,17 @@ exports.updateUserData = async (request, response, next) => {
         
         const userData = await UserModel.findById(userId)
        
-        if (!userData) return response.status(404).json({ success: false, message: 'User not found' })
+        if (!userData) return response.status(404).json({ success: false, message: ('User not found')})
             
-        if (userData.username !== username) {
+        if (userData.username !== (username)) {
             const existingUser = await UserModel.findOne({ username })
+            //will not change username if username already in use
             if (existingUser) username = userData.username
-        }
+        } //end if
 
         const updateData = { username, bio, location, full_name }
-        const profile = (request.files.profile && request.files.profile[0])
-        const cover = (request.files.cover && request.files.cover[0])
+        const profile = (request.files.profile && (request.files.profile[0]))
+        const cover = (request.files.cover && (request.files.cover[0]))
         
         if (profile) {
             const buffer = readFileSync(profile.path)
@@ -48,14 +48,15 @@ exports.updateUserData = async (request, response, next) => {
             const imageURL = imagekit.url({
                 path: upload.filePath,
                 transformation: [
-                    { quality: 'auto' },
-                    { format: 'webp' },
-                    { width: 512 }
+                    ({ quality: 'auto' }),
+                    ({ format: 'webp' }),
+                    ({ width: 512 })
                 ]
             })
 
             updateData.profile_picture = imageURL
-        }
+
+        } //end if
 
         if (cover) {
             const buffer = readFileSync(cover.path)
@@ -66,23 +67,23 @@ exports.updateUserData = async (request, response, next) => {
             const imageURL = imagekit.url({
                 path: upload.filePath,
                 transformation: [
-                    { quality: 'auto' },
-                    { format: 'webp' },
-                    { width: 1280 }
+                    ({ quality: 'auto' }),
+                    ({ format: 'webp' }),
+                    ({ width: 1280 })
                 ]
             })
 
             updateData.cover_photo = imageURL
-        }
-        
-        const updatedUser = await UserModel.findByIdAndUpdate(userId, updateData, { new: true })
-        response.json({ success: true, user: updatedUser, message: 'User profile updated' })
 
+        } //end if
+        
+        const updateUser = await UserModel.findByIdAndUpdate(userId, updateData, ({ new: true })) 
+        response.json({ success: true, user: updateUser, message: ('User profile updated') })
     } catch (error) {
         console.error(error)
-        response.json({ success: false, message: error.message })
-    }
-}
+        response.json({ success: false, message: (error.message) })
+    } //end try-catch
+} //end function
 
 
 //Find User Information
