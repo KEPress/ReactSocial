@@ -26,8 +26,9 @@ exports.updateUserData = async (request, response, next) => {
         let { username, bio, location, full_name } = request.body
         
         const userData = await UserModel.findById(userId)
-        (!username && (username = userData.username ))
-
+       
+        if (!userData) return response.status(404).json({ success: false, message: ('User not found')})
+            
         if (userData.username !== (username)) {
             const user = await UserModel.findOne({ username })
             //will not change username if username already in use
