@@ -30,9 +30,9 @@ exports.updateUserData = async (request, response, next) => {
         if (!userData) return response.status(404).json({ success: false, message: ('User not found')})
             
         if (userData.username !== (username)) {
-            const user = await UserModel.findOne({ username })
+            const existingUser = await UserModel.findOne({ username })
             //will not change username if username already in use
-            if (user) username = userData.username
+            if (existingUser) username = userData.username
         } //end if
 
         const updateData = { username, bio, location, full_name }
@@ -77,8 +77,8 @@ exports.updateUserData = async (request, response, next) => {
 
         } //end if
         
-        const user = await UserModel.findByIdAndUpdate(userId, updateData, ({ new: true })) 
-        response.json({ success: true, user, message: ('User profile updated') })
+        const updateUser = await UserModel.findByIdAndUpdate(userId, updateData, ({ new: true })) 
+        response.json({ success: true, user: updateUser, message: ('User profile updated') })
     } catch (error) {
         console.error(error)
         response.json({ success: false, message: (error.message) })
