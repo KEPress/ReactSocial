@@ -2,6 +2,8 @@ const { readFileSync } = require('fs')
 const { getAuth } = require('@clerk/express')
 const { imagekit } = require('../middleware/imagekit')
 const { UserModel } = require('../models/user.model')
+const { ConnectModel } = require('../models/connect.model')
+const { request } = require('http');
 
 //Get User Data using User Id
 exports.getUserData = async (request, response, next) => {
@@ -157,4 +159,84 @@ exports.unfollowUser = async (request, response, next) => {
         console.error(error)
         response.json({ success: false, message: (error.message) })
     } //end try-catch
+}
+
+
+exports.sendConnectRequest = async (request, response, next) => {
+
+    try {
+        const { userId } = getAuth(request)
+        const { id } = request.body
+
+        //Check if user has sent more than 20 connection requests in the last 24hrs
+        const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000)
+        const connectRequest = await ConnectModel.find({ from_user_id: userId, createdAt: { $gt: last24Hours } })
+        if (connectRequest.length >= (20)) return response.json({ success: false, message: ('You have sent more than 20 requests in last 24 hours') })
+        const connection = await ConnectModel.findOne({
+            $or: [{ from_user_id: userId, to_user_id: id }, 
+                  { from_user_id: id, to_user_id: userId }]
+        })    
+
+        if (!connection) {
+            await ConnectModel.create({ from_user_id: userId, to_user_id: id })
+            return response.json({ success: true, message: ('Connection request sent successfully') })
+        } else if (connection && (connection.status === ('accepted'))) {
+            return response.json({ success: false, message: ('You are already connected') })
+        } //end if-else
+        
+        return response.json({ success: false, message: ('Connection request pending') })
+    } catch (error) {
+        console.error(error)   
+        response.json({ success: false, message: (error.message) }) 
+    } //end try-catch
+}
+
+
+//Get user connections
+exports.getUserConnections = async (request, response, next) => {
+
+    try {
+        const { userId } = getAuth(request)
+        const user = await UserModel.findById(userId).populate('connections followers following')
+        const connections = user.connections
+        const followers = user.followers
+        const following = user.following
+
+        const pending = (await ConnectModel.find({ to_user_id: userId, status: 'pending' }).populate('from_user_id')).map((connection) => (connection.from_user_id))
+        response.json({ success: true, connections, followers, following, pending })
+    } catch (error) {
+        console.error(error)   
+        response.json({ success: false, message: (error.message) }) 
+    } //end try-catch
+}
+
+
+// Accept Connection Request
+exports.acceptConnectRequests = async (request, response, next) => {
+
+    try {
+        const { userId } = getAuth(request)
+        const { id } = request.body
+
+        const connection = await ConnectModel.findOne({ from_user_id: id, to_user_id: userId })
+        if (!connection) return response.json({ success: false, message: ('Connection not found') })
+
+        const user = await UserModel.findById(userId)
+        user.connections.push(id)
+        await user.save()
+
+        const toUser = await UserModel.findById(id)
+        toUser.connections.push(userId)
+        await toUser.save()
+
+        connection.status = ('accepted')
+        await connection.save()
+
+        response.json({ success: true, message: ('Connection accepted successfully') })
+    
+    } catch (error) {
+        console.error(error)
+        response.json({ success: false, message: error.message })
+    } //end try-catch
+
 }
