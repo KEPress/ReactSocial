@@ -79,7 +79,7 @@ const sendConnectionRequestReminder = inngest.createFunction(
         await step.sleepUntil('wait-for-24-hours', dailyCheck)
         await step.run('send-connection-request-reminder', async () => {
             const connection = await ConnectModel.findById(connectionId).populate('from_user_id to_user_id')
-            if (connection === ('accepted')) return ({ message: ('Already accepted') })
+            if (connection.status === ('accepted')) return ({ message: ('Already accepted') })
             
             const subject = (`👋 New Connection Request`)
             const body = (`<div style="font-family: Arial, sans-serif; padding: 20px;">
