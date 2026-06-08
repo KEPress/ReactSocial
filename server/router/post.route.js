@@ -3,10 +3,7 @@ const { addPost, getFeedPosts, likePost } = require('../controllers/post.control
 const { protect } = require('../config/authorize')
 const { upload } = require('../middleware/multer')
 
-router.post('/add', (request, response) => {
-    console.log('DIRECT TEST')
-    response.json({ success: true })
-})
+router.post(`/add`, upload.array('images', 4), protect, addPost)
 
 router.get(`/feed`, protect, getFeedPosts)
 
