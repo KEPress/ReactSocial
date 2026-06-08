@@ -3,7 +3,6 @@ const { readFileSync } = require('fs')
 const { imagekit } = require('../middleware/imagekit')
 const { PostModel } = require('../models/post.model')
 const { UserModel } = require('../models/user.model')
-const { request } = require('http');
 
 exports.addPost = async (request, response, next) => {
     
