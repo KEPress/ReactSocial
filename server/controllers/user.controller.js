@@ -3,7 +3,6 @@ const { getAuth } = require('@clerk/express')
 const { imagekit } = require('../middleware/imagekit')
 const { UserModel } = require('../models/user.model')
 const { ConnectModel } = require('../models/connect.model')
-const { request } = require('http');
 
 //Get User Data using User Id
 exports.getUserData = async (request, response, next) => {
@@ -179,12 +178,13 @@ exports.sendConnectRequest = async (request, response, next) => {
 
         if (!connection) {
             await ConnectModel.create({ from_user_id: userId, to_user_id: id })
-            return response.json({ success: true, message: ('Connection request sent successfully') })
+            response.json({ success: true, message: ('Connection request sent successfully') })
         } else if (connection && (connection.status === ('accepted'))) {
-            return response.json({ success: false, message: ('You are already connected') })
+            response.json({ success: false, message: ('You are already connected') })
+        } else {
+            response.json({ success: false, message: ('Connection request pending') })
         } //end if-else
-        
-        return response.json({ success: false, message: ('Connection request pending') })
+
     } catch (error) {
         console.error(error)   
         response.json({ success: false, message: (error.message) }) 
