@@ -18,7 +18,7 @@ application.use(clerkMiddleware())
 
 application.get(`/`, (request, response) => response.send('Server is online'))
 application.use(`/api/inngest`, serve({ client: inngest, functions }))
-application.use(`/api/user`, userRoute).use(`/api/post`, postRoute)
+application.use(`/api/post`, postRoute)
 
 const PORT = (process.env.PORT || (4000))
 
