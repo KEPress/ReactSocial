@@ -9,4 +9,8 @@ router.get(`/feed`, protect, getFeedPosts)
 
 router.post(`/like`, protect, likePost)
 
+router.get(`/test`, (request, response) => {
+    response.json({ success: true, message: ('Post router online & operational') })
+})
+
 exports.postRoute = router
