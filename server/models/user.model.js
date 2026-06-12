@@ -19,4 +19,4 @@ const userSchema =  new Schema({
 
 }, { timestamps: true, minimize: false })
 
-exports.UserModel = model('Users', userSchema)
+exports.UserModel = model('User', userSchema)
