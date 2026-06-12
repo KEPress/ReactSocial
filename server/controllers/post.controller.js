@@ -13,17 +13,17 @@ exports.addPost = async (request, response, next) => {
 
         let image_urls = Array()
 
-        if (image_urls.length) {
+        if (images && (images.length)) {
             image_urls = await Promise.all(images.map(async (image) => {
                 const fileBuffer = readFileSync(image.path)
-                const response = await imagekit.upload({
+                const uploadResult = await imagekit.upload({
                     file: fileBuffer,
                     fileName: image.originalname,
                     folder: ('posts'),
                 })
 
                 const url = imagekit.url({
-                    path: response.filePath,
+                    path: uploadResult.filePath,
                     transformation: [
                         { quality: 'auto' },
                         { format: 'webp' },
