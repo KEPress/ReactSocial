@@ -1,6 +1,7 @@
 const { readFileSync } = require('fs')
 const { getAuth } = require('@clerk/express')
 const { imagekit } = require('../middleware/imagekit')
+const { inngest } = require('../middleware/injest')
 const { StoryModel } = require('../models/story.model')
 const { UserModel } = require('../models/user.model')
 
@@ -23,6 +24,9 @@ exports.addStory = async (request, response, next) => {
 
         //Create a Story
         const story = await StoryModel.create({ user: userId, content, media_url, media_type, background_color })
+           
+        //Remove story after creation of 24 hours
+        await inngest.send({ name: 'app/story-deletion', data: { storyId: story._id } })
         response.json({ success: true, message: ('Story created successfully') })
     } catch (error) {
         console.error(error)

@@ -1,6 +1,7 @@
 const { readFileSync } = require('fs')
 const { getAuth } = require('@clerk/express')
 const { imagekit } = require('../middleware/imagekit')
+const { inngest } = require('../middleware/injest')
 const { UserModel } = require('../models/user.model')
 const { PostModel } = require('../models/post.model')
 const { ConnectModel } = require('../models/connect.model')
@@ -179,6 +180,7 @@ exports.sendConnectRequest = async (request, response, next) => {
 
         if (!connection) {
             await ConnectModel.create({ from_user_id: userId, to_user_id: id })
+            await inngest.send({ name: 'app/connection-request', data: { connectionId: connection._id } })
             response.json({ success: true, message: ('Connection request sent successfully') })
         } else if (connection && (connection.status === ('accepted'))) {
             response.json({ success: false, message: ('You are already connected') })
