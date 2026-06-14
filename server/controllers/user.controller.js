@@ -2,6 +2,7 @@ const { readFileSync } = require('fs')
 const { getAuth } = require('@clerk/express')
 const { imagekit } = require('../middleware/imagekit')
 const { UserModel } = require('../models/user.model')
+const { PostModel } = require('../models/post.model')
 const { ConnectModel } = require('../models/connect.model')
 
 //Get User Data using User Id
@@ -237,6 +238,26 @@ exports.acceptConnectRequests = async (request, response, next) => {
     } catch (error) {
         console.error(error)
         response.json({ success: false, message: error.message })
+    } //end try-catch
+
+}
+
+
+
+exports.getUserProfiles = async (request, response, next) => {
+
+    try { 
+        const { profileId } = request.body
+        const profile = await UserModel.findById(profileId)
+        if (!profile) {
+            response.json({ success: false, message: ('User profile not found') })
+        } else {
+            const posts = await PostModel.find({ user: profileId }).sort({ createdAt: (-1) })
+            response.json({ success: true, profile, posts })
+        } //end if-else 
+    } catch (error) {
+        console.error(error)
+        response.json({ success: false, message: (error.message) })
     } //end try-catch
 
 }

@@ -2,6 +2,7 @@ const { Inngest } = require('inngest')
 const { UserModel } = require('../models/user.model')
 const { database_connect } = require('../config/database')
 const { ConnectModel } = require('../models/connect.model')
+const { StoryModel } = require('../models/story.model')
 const { sendEmail } = require('../middleware/nodemailer') 
 
 const inngest = new Inngest({ id: 'reactsocial' })
@@ -97,8 +98,20 @@ const sendConnectionRequestReminder = inngest.createFunction(
     } //end function
 )
 
+const deleteStoryMedia = inngest.createFunction(
+    { id: 'delete-story-media', triggers: [{ event: 'app/story-deletion' }] }, 
+    async ({ event, step }) => {
+        const { storyId } = event.data
+        const in24Hours = new Date(Date.now() + 2 * 60 * 60 * 1000)
+        await step.sleepUntil('wait-for-24-hours', in24Hours)
+        await step.run('delete-story-media-after-24-hours', async () => {
+            await StoryModel.findByIdAndDelete(storyId)
+            return ({ message: ('Story media deleted') })
+        })
+    } //end function
+)
 
-const functions = [syncUserCreation, syncUserUpdate, syncUserDeletion, sendConnectionRequestReminder]
+const functions = [syncUserCreation, syncUserUpdate, syncUserDeletion, sendConnectionRequestReminder, deleteStoryMedia]
 
 
 module.exports = { inngest, functions }

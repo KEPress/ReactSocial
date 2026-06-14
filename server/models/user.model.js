@@ -10,8 +10,8 @@ const userSchema =  new Schema({
     username: { type: String, unique: true },
     bio: { type: String, default: ('Hey there I am on React Social') },
     profile_picture: { type: String, default: new String() },
-    cover_photo: { type: String, default: '' },
-    location: { type: String, default: '' },
+    cover_photo: { type: String, default: new String() },
+    location: { type: String, default: new String() },
     //NOTE: followers, following & connections all references the clerk _id field setup 
     followers: [{ type: String, ref: 'User' }],
     following: [{ type: String, ref: 'User' }],

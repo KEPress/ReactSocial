@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { getUserData, updateUserData, locateUsers, followUser, unfollowUser, getUserConnections, sendConnectRequest, acceptConnectRequests } = require('../controllers/user.controller')
+const { getUserData, updateUserData, locateUsers, followUser, unfollowUser, getUserConnections, sendConnectRequest, acceptConnectRequests, getUserProfiles } = require('../controllers/user.controller')
 const { protect } = require('../config/authorize')
 const { upload } = require('../middleware/multer')
 
@@ -18,5 +18,7 @@ router.post(`/unfollow`, protect, unfollowUser)
 router.post(`/connect`, protect, sendConnectRequest)
 
 router.post(`/accept`, protect, acceptConnectRequests)
+
+router.post(`/profiles`, protect, getUserProfiles)
 
 exports.userRoute = router
