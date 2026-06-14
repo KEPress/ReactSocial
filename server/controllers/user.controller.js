@@ -179,8 +179,8 @@ exports.sendConnectRequest = async (request, response, next) => {
         })    
 
         if (!connection) {
-            await ConnectModel.create({ from_user_id: userId, to_user_id: id })
-            await inngest.send({ name: 'app/connection-request', data: { connectionId: connection._id } })
+            const newConnection = await ConnectModel.create({ from_user_id: userId, to_user_id: id })
+            await inngest.send({ name: 'app/connection-request', data: { connectionId: newConnection._id } })
             response.json({ success: true, message: ('Connection request sent successfully') })
         } else if (connection && (connection.status === ('accepted'))) {
             response.json({ success: false, message: ('You are already connected') })
