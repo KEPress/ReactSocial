@@ -102,7 +102,6 @@ const sendConnectionRequestReminder = inngest.createFunction(
 
 const sendNoticeUnseenMessages = inngest.createFunction(
     { id: 'send-notice-for-unseen-messages', triggers: [{ event: 'app/new-message' }] },
-    { cron: 'TZ=America/New_York 0 9 * * *' },
     async ({ event, step }) => {
         const messages = await MessageModel.find({ seen: false }).populate('to_user_id')
         const unseen = new Object()
@@ -127,6 +126,32 @@ const sendNoticeUnseenMessages = inngest.createFunction(
 )
 
 
+// ✅ Cron-triggered version (fires every day at 9am New York time)
+const sendDailyUnseenMessageDigest = inngest.createFunction(
+    { id: 'send-daily-unseen-message-digest', triggers: [{ cron: 'TZ=America/New_York 0 9 * * *' }] },
+    async ({ step }) => {
+        const messages = await MessageModel.find({ seen: false }).populate('to_user_id')
+        const unseen = new Object()
+        messages.map((message) => {
+            unseen[message.to_user_id._id] = (unseen[message.to_user_id._id] || 0) + 1
+        })
+
+        for (const userId in unseen) {
+            const user = await UserModel.findById(userId)
+            const subject = (`📬 You have ${unseen[userId]} unseen messages`)
+            const body = (`<div style="font-family: Arial, sans-serif; padding: 20px;">
+                            <h2>Hi ${user.full_name},</h2>
+                            <p>You have ${unseen[userId]} unseen messages waiting for you.</p>
+                            <p>Click <a href="${process.env.FRONTEND_URL}/messages" style="color: #10b981;">here</a> to check your messages</p>
+                            <br/>
+                            <p>Thanks,<br/>PingUp - Stay Connected</p>
+                           </div>`)
+            await sendEmail({ to: user.email, subject, body })
+        } //end for
+        return ({ message: 'Daily digest sent' })
+    } //end function
+)
+
 
 const deleteStoryMedia = inngest.createFunction(
     { id: 'delete-story-media', triggers: [{ event: 'app/story-deletion' }] }, 
@@ -141,7 +166,7 @@ const deleteStoryMedia = inngest.createFunction(
     } //end function
 )
 
-const functions = [syncUserCreation, syncUserUpdate, syncUserDeletion, sendConnectionRequestReminder, sendNoticeUnseenMessages, deleteStoryMedia]
+const functions = [syncUserCreation, syncUserUpdate, syncUserDeletion, sendConnectionRequestReminder, sendNoticeUnseenMessages, sendDailyUnseenMessageDigest, deleteStoryMedia]
 
 
 module.exports = { inngest, functions }
