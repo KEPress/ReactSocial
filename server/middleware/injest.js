@@ -1,5 +1,4 @@
 const { Inngest } = require('inngest')
-const { UserModel } = require('../models/user.model')
 const { database_connect } = require('../config/database')
 const { ConnectModel } = require('../models/connect.model')
 const { UserModel } = require('../models/user.model')
