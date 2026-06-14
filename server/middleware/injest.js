@@ -2,7 +2,9 @@ const { Inngest } = require('inngest')
 const { UserModel } = require('../models/user.model')
 const { database_connect } = require('../config/database')
 const { ConnectModel } = require('../models/connect.model')
+const { UserModel } = require('../models/user.model')
 const { StoryModel } = require('../models/story.model')
+const { MessageModel } = require('../models/message.model')
 const { sendEmail } = require('../middleware/nodemailer') 
 
 const inngest = new Inngest({ id: 'reactsocial' })
@@ -98,6 +100,35 @@ const sendConnectionRequestReminder = inngest.createFunction(
     } //end function
 )
 
+
+const sendNoticeUnseenMessages = inngest.createFunction(
+    { id: 'send-notice-for-unseen-messages', triggers: [{ event: 'app/new-message' }] },
+    { cron: 'TZ=America/New_York 0 9 * * *' },
+    async ({ event, step }) => {
+        const messages = await MessageModel.find({ seen: false }).populate('to_user_id')
+        const unseen = new Object()
+        messages.map((message) => {
+            unseen[message.to_user_id._id] = (unseen[message.to_user_id._id] || (0)) + 1
+        })
+
+        for (const userId in unseen) {
+            const user = await UserModel.findById(userId)
+            const subject = (`📬 You have ${unseen[userId]} unseen messages`)
+            const body = (`<div style="font-family: Arial, sans-serif; padding: 20px;">
+                            <h2>Hi ${user.full_name},</h2>
+                            <p>You have ${unseen[userId]} unseen messages waiting for you.</p>
+                            <p>Click <a href="${process.env.FRONTEND_URL}/messages" style="color: #10b981;">here</a> to check your messages</p>
+                            <br/>
+                            <p>Thanks,<br/>PingUp - Stay Connected</p>
+                           </div>`)
+            await sendEmail({ to: user.email, subject, body })              
+        } //end for
+        return ({ message: ('Notification sent') })
+    } //end function
+)
+
+
+
 const deleteStoryMedia = inngest.createFunction(
     { id: 'delete-story-media', triggers: [{ event: 'app/story-deletion' }] }, 
     async ({ event, step }) => {
@@ -111,7 +142,7 @@ const deleteStoryMedia = inngest.createFunction(
     } //end function
 )
 
-const functions = [syncUserCreation, syncUserUpdate, syncUserDeletion, sendConnectionRequestReminder, deleteStoryMedia]
+const functions = [syncUserCreation, syncUserUpdate, syncUserDeletion, sendConnectionRequestReminder, sendNoticeUnseenMessages, deleteStoryMedia]
 
 
 module.exports = { inngest, functions }
