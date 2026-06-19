@@ -1,6 +1,9 @@
 import { BrowserRouter } from 'react-router-dom'
 import { createRoot } from 'react-dom/client'
+import { Provider } from 'react-redux'
 import { ClerkProvider } from '@clerk/react'
+import { PersistGate } from 'redux-persist/integration/react'
+import { store, persistor } from '@store/store'
 import { Application } from '@/Application'
 import '@styles/tailwind.css'
 import '@/main.scss'
@@ -15,7 +18,11 @@ if (!PUBLISHABLE_KEY) throw new Error('Missing Publishable key')
 
 createRoot(document.getElementById('root'))
 .render(<ClerkProvider publishableKey={(PUBLISHABLE_KEY)}>
-            <BrowserRouter>
-               <Application />
-            </BrowserRouter>
-          </ClerkProvider>)
+            <Provider store={(store)}>
+               <PersistGate loading={(null)} persistor={(persistor)}>
+                  <BrowserRouter>
+                     <Application />
+                  </BrowserRouter>
+               </PersistGate>
+            </Provider>
+         </ClerkProvider>)
