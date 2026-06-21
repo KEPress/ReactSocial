@@ -5,7 +5,6 @@ import { Post } from '@components/Post'
 import { assets, dummyPostsData } from '@assets/assets'
 import { RecentMessages } from '@components/Messages'
 
-
 export const Feed = () => {
 
   const [feeds, setFeeds] = useState(Array)

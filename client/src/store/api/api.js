@@ -6,12 +6,12 @@ export const api = createApi({
     baseQuery: fetchBaseQuery({ 
         baseUrl: import.meta.env.VITE_BASE_URL,
         prepareHeaders: (headers, { getState }) => {
-            const token = getState().auth.token
+            const token = getState().authorize.token
             if (token) headers.set('Authorization', (`Bearer ${token}`))
             return (headers)
         }
     }),
-    tags: ['User', 'Post', 'Connection', 'Message', 'Story'],
+    tagTypes: ['User', 'Post', 'Connection', 'Message', 'Story'],
     endpoints: (builder) => ({
         
         // ── USER ─────────────────────────────────────────────────────────────────
@@ -99,7 +99,7 @@ export const api = createApi({
                 body: ({ postId }) 
             }),
             async onQueryStarted({ postId }, { dispatch, queryFulfilled, getState }) {
-                const userId = getState().auth.userId
+                const userId = getState().authorize.userId
                 const patch = dispatch(api.util.updateQueryData('getFeedPosts', undefined, (draft) => {
                     const post = draft.posts.find((post) => (post._id === (postId)))
                     if (post) {
@@ -112,11 +112,7 @@ export const api = createApi({
         }),
         // ── MESSAGES ──────────────────────────────────────────────────────────────
         getMessages: builder.query({
-            query: (to_user_id) => ({ 
-                url: (`/api/message/get?to_user_id=${to_user_id}`), 
-                method: 'GET', 
-                body: ({ to_user_id }) 
-            }),
+            query: (to_user_id) => (`/api/message/get?to_user_id=${to_user_id}`),
             providesTags: (result, error, to_user_id) => ([ 
                 ({ type: 'Message', id: to_user_id }) 
             ])
@@ -157,15 +153,15 @@ export const api = createApi({
 
 export const {
   // User
-  useGetUserDataQuery,
-  useUpdateUserDataMutation,
-  useLocateUsersMutation,
+  useGetUserQuery,
+  useUpdateUserMutation,
+  useDiscoverUsersQuery,
   useFollowUserMutation,
   useUnfollowUserMutation,
   useSendConnectRequestMutation,
   useGetUserConnectionsQuery,
   useAcceptConnectRequestMutation,
-  useGetUserProfileMutation,
+  useGetUserProfileQuery,
   // Posts
   useGetFeedPostsQuery,
   useAddPostMutation,
