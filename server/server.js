@@ -15,7 +15,11 @@ setServers(Array('8.8.8.8', '8.8.4.4'))
 const application = express()
 
 application.use(express.json())
-application.use(cors())
+application.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
+}))
 application.use(clerkMiddleware())
 
 application.get(`/`, (request, response) => response.send('Server is online'))

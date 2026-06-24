@@ -19,6 +19,7 @@ export default defineConfig({
           '@utils': resolve(__dirname, ('src/utils')),
           '@pages': resolve(__dirname, ('src/pages')),
           '@store': resolve(__dirname, ('src/store')),
+          '@middleware': resolve(__dirname, ('src/middleware')),
           '@assets': resolve(__dirname, ('src/assets'))
       })
   })

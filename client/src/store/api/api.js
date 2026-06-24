@@ -9,7 +9,7 @@ export const api = createApi({
             const token = getState().authorize.token
             if (token) headers.set('Authorization', (`Bearer ${token}`))
             return (headers)
-        }
+        } //end prepareHeaders
     }),
     tagTypes: ['User', 'Post', 'Connection', 'Message', 'Story'],
     endpoints: (builder) => ({

@@ -33,7 +33,7 @@ export const messaging = createSlice({
             state.draft.image = action.payload
         },
         clearDraft: (state) => {
-            state.draft.text = ''
+            state.draft.text = String()
             state.draft.image = (null)
         }
     }

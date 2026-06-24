@@ -10,6 +10,7 @@
       "@utils/*": ["src/utils/*"],
       "@pages/*": ["src/pages/*"],
       "@store/*": ["src/store/*"],
+      "@middleware/*": ["src/middleware/*"],
       "@assets/*": ["src/assets/*"]
     }
   },

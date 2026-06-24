@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import { ClerkProvider } from '@clerk/react'
 import { PersistGate } from 'redux-persist/integration/react'
 import { store, persistor } from '@store/store'
+import { ClerkAuthorizeSync } from '@middleware/ClerkAuthorizeSync'
 import { Application } from '@/Application'
 import '@styles/tailwind.css'
 import '@/main.scss'
@@ -21,7 +22,9 @@ createRoot(document.getElementById('root'))
             <Provider store={(store)}>
                <PersistGate loading={(null)} persistor={(persistor)}>
                   <BrowserRouter>
-                     <Application />
+                     <ClerkAuthorizeSync>
+                        <Application />
+                     </ClerkAuthorizeSync>
                   </BrowserRouter>
                </PersistGate>
             </Provider>
