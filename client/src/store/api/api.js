@@ -5,8 +5,8 @@ export const api = createApi({
     reducerPath: 'api',
     baseQuery: fetchBaseQuery({ 
         baseUrl: import.meta.env.VITE_BASE_URL,
-        prepareHeaders: (headers, { getState }) => {
-            const token = getState().authorize.token
+        prepareHeaders: async (headers, { getState }) => {
+            const token = await getState().authorize.token
             if (token) headers.set('Authorization', (`Bearer ${token}`))
             return (headers)
         } //end prepareHeaders

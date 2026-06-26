@@ -1,21 +1,30 @@
 import React, { useState } from 'react'
 import { X, Image } from 'lucide-react'
-import { dummyUserData } from '@assets/assets'
+import { useGetUserQuery, useAddPostMutation } from '@store/api/api'
 import toast from 'react-hot-toast'
 
 export const CreatePost = () => {
 
-  const user = dummyUserData
+  const { data } = useGetUserQuery()
+
+  const user = data?.user
 
   const [content, setContent] = useState(String)
 
   const [images, setImages] = useState(Array)
 
-  const [loading, setLoading] = useState(false)
-
+  const [addPost, { isLoading }] = useAddPostMutation()
+ 
   const handleSubmit = async () => {
-
-  }
+    const post_type = ((images.length > (0)) ? ((content) ? ('text_with_image'):('image')):('text'))
+    const formData = new FormData()
+    formData.append('content', content)
+    formData.append('post_type', post_type)
+    images.forEach((image) => (formData.append('images', image)))
+    await addPost(formData).unwrap()
+    setContent(new String())
+    setImages(new Array())
+  } //end function
 
   return (<React.Fragment>
             <div className={'min-h-screen bg-gradient-to-b from-slate-50 to-white'}>
@@ -29,10 +38,10 @@ export const CreatePost = () => {
                 <div className={'max-w-xl bg-white p-4 sm:p-8 sm:pb-3 rounded-xl shadow-md space-y-4'}>
                   {/* Header */}
                   <div className={'flex items-center gap-3'}>
-                    <img src={(user.profile_picture)} alt={''} className={'w-12 h-12'} />
+                    <img src={(user?.profile_picture)} alt={''} className={'w-12 h-12'} />
                     <div>
-                      <h2 className={'font-semibold'}>{(user.full_name)}</h2>
-                      <p className={'text-sm text-gray-500'}>@{(user.username)}</p>
+                      <h2 className={'font-semibold'}>{(user?.full_name)}</h2>
+                      <p className={'text-sm text-gray-500'}>@{(user?.username)}</p>
                     </div>
                   </div>
                   {/* Text Area */}
@@ -54,7 +63,7 @@ export const CreatePost = () => {
                             <Image className={'size-6'} />
                         </label>
                         <input type={'file'} id={'images'} accept={'image/*'} onChange={((event) => setImages([...images, ...Array.from(event.target.files)]))} multiple hidden />
-                        <button type={'submit'} onClick={(() => (toast.promise(handleSubmit(), { loading: 'uploading...', success: (<p>Post Added</p>), error: (<p>Post Not Added</p>) })))} className={'text-sm bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition text-white font-medium px-8 py-2 rounded-md cursor-pointer'} disabled={(loading)}>
+                        <button type={'submit'} onClick={(() => (toast.promise(handleSubmit(), { loading: 'uploading...', success: (<p>Post Added</p>), error: (<p>Post Not Added</p>) })))} className={'text-sm bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition text-white font-medium px-8 py-2 rounded-md cursor-pointer'} disabled={(isLoading)}>
                            Publish Post
                         </button>
                       </div>
