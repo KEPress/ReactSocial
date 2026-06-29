@@ -1,21 +1,30 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Heart, MessageCircle, Share2, BadgeCheck } from 'lucide-react'
-import { dummyUserData } from '@assets/assets'
+import { useLikePostMutation, useGetUserQuery } from '@store/api/api'
+//import { dummyUserData } from '@assets/assets'
 import moment from 'moment'
 
 export const Post = ({ post = Object() }) => {
 
     const navigate = useNavigate() 
 
-    const currentUser = dummyUserData
+    const { data } = useGetUserQuery()
+
+    const currentUser = data?.user
 
     const hashTags = post.content.replace(/(#\w+)/g, '<span class="text-indigo-500">$1</span>')
   
-    const [likes, setLikes] = useState(post.likes_count);
+    const [likePost] = useLikePostMutation()
 
-    const handleLike = async () => {}
+    const [likes, setLikes] = useState(post.likes_count || (new Array()))
 
+    const handleLike = async () => {
+        const check = likes.includes(currentUser._id)
+        setLikes(check ? (likes.filter((id) => (id !== (currentUser._id)))):([...likes, currentUser._id]))
+        await likePost(post._id).unwrap()
+    }
+   
 
     return (<React.Fragment>
                 <div className={'bg-white rounded-xl shadow p-4 space-y-4 w-full max-w-2xl'}>

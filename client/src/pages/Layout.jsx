@@ -8,8 +8,7 @@ import { useGetUserQuery } from '@store/api/api'
 import { toggleSidebar, selectSidebarOpen } from '@store/slices/interface'
 
 export const Layout = () => {
-
-
+    
     const dispatch = useDispatch()
 
     const openSidebar = useSelector(selectSidebarOpen)

@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 import { X, ArrowLeft, Pencil, TextIcon, Upload, Sparkle, BadgeCheck } from 'lucide-react'
-import { dummyUserData } from '@assets/assets'
+import { useAddStoryMutation, useGetUserQuery, useUpdateUserMutation } from '@store/api/api'
+import { selectToken } from '@store/slices/authorize'
 import toast from 'react-hot-toast'
 
-export const StoryModal = ({ setShowModal = () => ({}), fetchStories = () => ({}) }) => {
+export const StoryModal = ({ setShowModal = () => ({}) }) => {
+
+
+    const [addStory] = useAddStoryMutation()
 
     const bgColors = ['#4f46e5', '#7c3aed', '#db2777', '#e11d48', '#ca8a04', '#0d9488']
 
@@ -25,9 +30,16 @@ export const StoryModal = ({ setShowModal = () => ({}), fetchStories = () => ({}
         } //end if
     }
 
-    const handleCreateStory = async (params) => {
-
-    }
+    const handleCreateStory = async () => {
+        const formData = new FormData()
+        formData.append('content', text)
+        formData.append('background_color', backdrop)
+        formData.append('media_type', ((mode === ('media')) ? ((media?.type.startsWith('video')) ? ('video'):('image')):('text')))
+        if (media) formData.append('media', media)
+        await addStory(formData).unwrap()
+        // RTK Query automatically refetches useGetStoriesQuery via invalidateTags: ['Story'] - no fetchStories function needed
+        setShowModal(false)
+    }   
 
     return (<React.Fragment>
                 <div className={'fixed inset-0 z-110 min-h-screen bg-black/80 backdrop-blur text-white flex items-center justify-center p-4'}>
@@ -66,7 +78,7 @@ export const StoryModal = ({ setShowModal = () => ({}), fetchStories = () => ({}
 
 export const ViewStory = ({ view = (null), setView = () => ({}) }) => {
 
-    const [progress, setProgress] = useState(0)
+    const progressRef = useRef(null)
 
     const handleClose = () => setView(null)
 
@@ -82,20 +94,22 @@ export const ViewStory = ({ view = (null), setView = () => ({}) }) => {
     useEffect(() => {
         let timer, interval
         if (view && (view.media_type !== ('video'))) {
-            setProgress(0)
             const duration = 10000
-            const setTime = 100
-            let elasped = 0 
+            const tick = 100
+            let elapsed = 0
+
+            // Reset progress bar directly via DOM ref - no useState needed
+            if (progressRef.current) progressRef.current.style.width = ('0%')
 
             interval = setInterval(() => {
-                elasped += setTime
-                setProgress((elasped / duration) * 100) 
-            }, setTime)
+                elapsed += tick
+                const percent = (elapsed / duration) * 100
+                // Update DOM directly - bypasses state entirely
+                if (progressRef.current) progressRef.current.style.width = (`${percent}%`)
+                if (elapsed >= (duration)) clearInterval(interval)
+            }, tick)
 
-            //Close Off
-            timer = setTimeout(() => {
-                setView = (null)
-            }, duration)
+            timer = setTimeout(() => setView(), duration)
         } //end if
 
         return (() => {
@@ -110,7 +124,7 @@ export const ViewStory = ({ view = (null), setView = () => ({}) }) => {
                 <div className={'fixed inset-0 h-screen bg-black bg-opacity-90 z-110 flex items-center justify-center'} style={({ backgroundColor: (view.media_type === ('text')) ? (view.background_color):('#000000') })}>
                     {/* Progress Bar */}
                     <div className={'absolute top-0 left-0 w-full h-1 bg-gray-700'}>
-                        <div className={'h-full bg-white transition-all duration-100 linear'} style={({ width: (`${progress}%`) })}></div>
+                        <div ref={(progressRef)} className={'h-full bg-white transition-all duration-100 linear'} style={({ width: ('0%') })}></div>
                     </div>
                     {/* User Info - Top Left */}
                     <div className={'absolute top-4 left-4 flex items-center space-x-3 p-2 px-4 sm:p-4 sm:px-8 backdrop-blur-2xl rounded bg-black/50'}>
@@ -133,21 +147,39 @@ export const ViewStory = ({ view = (null), setView = () => ({}) }) => {
 
 
 
-export const ProfileModal = ({ setEdit = false }) => {
+export const ProfileModal = ({ setEdit = () => ({}) }) => {
 
-    const user = dummyUserData
+    const token = useSelector(selectToken)
+
+    const [updateUser] = useUpdateUserMutation()
+
+    const { data } = useGetUserQuery(undefined, { skip: !token })
+
+    const user = data?.user
 
     const [editForm, setEditForm] = useState({
-        username: user.username,
-        bio: user.bio,
-        location: user.location,
+        username: (user?.username || (new String())),
+        full_name: (user?.full_name || (new String())),
+        bio: (user?.bio || (new String())),
+        location: (user?.location || (new String())),
         profile_picture: null,
-        cover_photo: null,
-        full_name: user.full_name
+        cover_photo: null
     })
 
     const updateProfile = async (event) => {
         event.preventDefault()
+        
+        const formData = new FormData()
+        formData.append('username', editForm.username)
+        formData.append('full_name', editForm.full_name)
+        formData.append('bio', editForm.bio)
+        formData.append('location', editForm.location)
+        // Only append files if user selected new ones
+        if (editForm.profile_picture) formData.append('profile', editForm.profile_picture)
+        if (editForm.cover_photo) formData.append('cover', editForm.cover_photo)
+        await updateUser(formData).unwrap()
+        // invalidatesTags: ['User'] auto-refetches useGetUserQuery
+        setEdit(false)
     }
 
     return (<React.Fragment>

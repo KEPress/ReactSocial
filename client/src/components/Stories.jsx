@@ -1,28 +1,30 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Plus } from 'lucide-react'
-import moment from 'moment'
-import { dummyStoriesData } from '@assets/assets'
 import { StoryModal, ViewStory } from '@components/Modal'
+import { useGetStoriesQuery } from '@store/api/api'
+import { setActiveStory, clearActiveStory, selectActiveStory, selectStoryModalOpen, openStoryModal, closeStoryModal } from '@store/slices/interface'
+import moment from 'moment'
+
 
 export const Stories = () => {
 
-    const [modal, setModal] = useState(false)
+    const dispatch = useDispatch()
 
-    const [view, setView] = useState(null)
+    const view = useSelector(selectActiveStory)
 
-    const [stories, setStories] = useState(Array)
+    const modal = useSelector(selectStoryModalOpen)
+   
+    const { data } = useGetStoriesQuery()
 
-    const fetchStories = async () => setStories(dummyStoriesData)
+    const stories = (data?.stories || (new Array()))
 
-    useEffect(() => {
-        fetchStories()
-    }, [])
-  
+   
     return (<React.Fragment>
                 <div className={'w-screen sm:w-[calc(100vw-240px)] lg:max-w-2xl no-scrollbar overflow-x-auto px-4'}>
                     <div className={'flex gap-4 pb-5'}>
                         {/* Add Story */}
-                        <div onClick={(() => setModal(true))} className={'rounded-lg shadow-sm min-w-30 max-w-30 max-h-40 aspect-auto [3/4] cursor-pointer hover:shadow-lg transition-all duration-200 border-2 border-dashed border-indigo-300 bg-gradient from-indigo-50 to-white'}>
+                        <div onClick={(() => (dispatch(openStoryModal())))} className={'rounded-lg shadow-sm min-w-30 max-w-30 max-h-40 aspect-auto [3/4] cursor-pointer hover:shadow-lg transition-all duration-200 border-2 border-dashed border-indigo-300 bg-gradient from-indigo-50 to-white'}>
                             <div className={'h-full flex flex-col items-center justify-center p-4'}>
                                 <div className={'size-10 bg-indigo-500 rounded-full flex items-center justify-center mb-3'}>
                                     <Plus className={'w-5 h-5 text-white'} />
@@ -32,7 +34,7 @@ export const Stories = () => {
                         </div>
                         {/* Story Cards */}
                         {stories.map((story, index) => 
-                            (<div key={(index)} onClick={(() => (setView(story)))} className={(`relative rounded-lg shadow min-w-30 max-w-30 max-h-40 cursor-pointer hover:shadow-lg transition-all duration-200 bg-gradient-to-b from-indigo-500 to-purple-600 hover:from-indigo-700 hover:to-purple-800 active:scale-95`)}>
+                            (<div key={(index)} onClick={(() => (dispatch(setActiveStory(story))))} className={(`relative rounded-lg shadow min-w-30 max-w-30 max-h-40 cursor-pointer hover:shadow-lg transition-all duration-200 bg-gradient-to-b from-indigo-500 to-purple-600 hover:from-indigo-700 hover:to-purple-800 active:scale-95`)}>
                                 <img src={(story.user.profile_picture)} className={'absolute size-8 top-3 left-3 z-10 rounded-full ring ring-gray-100 shadow'} alt={''} />
                                 <p className={'absolute top-18 left-3 text-white/60 text-sm truncate max-w-24'}>
                                     {story.content}
@@ -46,9 +48,9 @@ export const Stories = () => {
                             </div>))}
                     </div>
                     {/* Add Story Modal */}
-                    {(modal && (<StoryModal setShowModal={(setModal)} fetchStories={(fetchStories)} />))}
+                    {(modal && (<StoryModal setShowModal={(() => (dispatch(closeStoryModal())))} />))}
                     {/* View Story Modal */}
-                    {(view && (<ViewStory view={(view)} setView={(setView)} />))}
+                    {(view && (<ViewStory view={(view)} setView={(() => (dispatch(clearActiveStory())))} />))}
                 </div>
            </React.Fragment>)
 

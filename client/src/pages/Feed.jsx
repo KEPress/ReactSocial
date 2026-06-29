@@ -1,26 +1,18 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Loading } from '@components/Loading'
 import { Stories } from '@components/Stories'
 import { Post } from '@components/Post'
-import { assets, dummyPostsData } from '@assets/assets'
+import { assets } from '@assets/assets'
 import { RecentMessages } from '@components/Messages'
+import { useGetFeedPostsQuery } from '@store/api/api'
 
 export const Feed = () => {
 
-  const [feeds, setFeeds] = useState(Array)
+  const { data, isLoading } = useGetFeedPostsQuery()
 
-  const [loading, setLoading] = useState(true)
-
-  const fetchFeeds = async () => {
-    setFeeds(dummyPostsData)
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    fetchFeeds()
-  }, [])
-
-  return ((!loading) ? 
+  const feeds = (data?.posts || (Array()))
+  
+  return ((!isLoading) ? 
     (<React.Fragment>
         <div className={'h-full overflow-y-scroll no-scrollbar py-10 xl:pr-5 flex items-start justify-center xl:gap-8'}>
           {/* Stories & Post List */}
