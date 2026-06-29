@@ -6,7 +6,6 @@ import { useGetStoriesQuery } from '@store/api/api'
 import { setActiveStory, clearActiveStory, selectActiveStory, selectStoryModalOpen, openStoryModal, closeStoryModal } from '@store/slices/interface'
 import moment from 'moment'
 
-
 export const Stories = () => {
 
     const dispatch = useDispatch()
@@ -19,7 +18,6 @@ export const Stories = () => {
 
     const stories = (data?.stories || (new Array()))
 
-   
     return (<React.Fragment>
                 <div className={'w-screen sm:w-[calc(100vw-240px)] lg:max-w-2xl no-scrollbar overflow-x-auto px-4'}>
                     <div className={'flex gap-4 pb-5'}>
