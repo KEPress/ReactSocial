@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
-import { dummyRecentMessagesData } from '@assets/assets'
+import { Loading } from '@components/Loading'
+import { useGetRecentMessagesQuery } from '@store/api/api'
 import moment from 'moment'
 
 export const RecentMessages = () => {
 
-    const [messages, setMessages] = useState(Array)
+    const { data, isLoading } = useGetRecentMessagesQuery()
 
-    const fetchRecentMessages = async () => setMessages(dummyRecentMessagesData)
+    const messages = (data?.messages || (new Array()))
 
-    useEffect(() => {
-        fetchRecentMessages()
-    }, [])
-
-    return (<React.Fragment>
+    return ((!isLoading) ? (<React.Fragment>
                 <div className={'bg-white max-w-xs mt-4 p-4 min-h-20 rounded-md shadow text-xs text-slate-800'}>
                     <h3 className={'font-semibold text-slate-8 mb-4'}>Recent Messages</h3>
                     <div className={'flex flex-col max-h-56 overflow-y-scroll no-scrollbar'}>
@@ -30,11 +27,9 @@ export const RecentMessages = () => {
                                         {(!message.seen && (<p className={'bg-indigo-500 text-white w-4 h-4 flex items-center justify-center rounded-full text-[10px]'}>1</p>))}
                                     </div>
                                 </div>
-                                
                             </Link>)))}
-
                     </div>
                 </div>
-           </React.Fragment>)
+           </React.Fragment>):(<Loading />))
 
 }
