@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { useParams } from 'react-router-dom'
-import { dummyPostsData, dummyUserData } from '@assets/assets'
+import { useParams, Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { selectToken } from '@store/slices/authorize'
+import { useGetUserQuery, useGetUserProfileMutation } from '@store/api/api'
 import { Loading } from '@components/Loading'
 import { UserInfo } from '@components/UserInfo'
 import { Post } from '@components/Post'
@@ -10,26 +11,29 @@ import moment from 'moment';
 
 export const Profile = () => {
 
-    const { userId } = useParams()
+   const { userId } = useParams()
 
-    const [user, setUser] = useState(null)
+   const [active, setActive] = useState('posts')
 
-    const [posts, setPosts] = useState(Array)
+   const [edit, setEdit] = useState(false)
 
-    const [active, setActive] = useState('posts')
+   const token = useSelector(selectToken)
 
-    const [edit, setEdit] = useState(false)
+   // Own profile data — used when no userId param (viewing own profile)
+   const { data: userData, isLoading: userLoading } = useGetUserQuery(undefined, { skip: (!token || (!!userId)) })
+    
+   // Other user's profile data — used when userId param is present (viewing another user's profile)
+   const [getUserProfile, { data: profileData, isLoading: profileLoading }] = useGetUserProfileMutation()
 
-    const fetchUser = async () => {
-       setUser(dummyUserData)
-       setPosts(dummyPostsData)
-    }
+   useEffect(() => {
+      if (userId && (token)) getUserProfile({ token, profileId: userId })
+   }, [userId, token, getUserProfile])
 
-    useEffect(() => {
-      fetchUser()
-    }, [])
-
-    return (user ? (<React.Fragment>
+   const isLoading = (userId ? (profileLoading) : (userLoading))
+   const user = (userId ? (profileData?.profile) : (userData?.user))
+   const posts = (userId ? (profileData?.posts || (Array())) : (userData?.posts || (Array())))
+   
+   return ((!user || (isLoading)) ? (<Loading />):(<React.Fragment>
                      <div className={'relative h-full overflow-y-scroll bg-gray-50 p-6'}>
                         <div className={'max-w-3xl mx-auto'}>
                            {/* Profile Card */}
@@ -66,5 +70,5 @@ export const Profile = () => {
                        
                         {(edit && (<ProfileModal setEdit={(setEdit)} />))}
                      </div>
-                  </React.Fragment>) : (<Loading />)) 
+                  </React.Fragment>)) 
 }

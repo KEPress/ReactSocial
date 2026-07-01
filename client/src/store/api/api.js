@@ -72,7 +72,7 @@ export const api = createApi({
             }),
             invalidatesTags: ['Connection', 'User']
         }),
-        getUserProfile: builder.query({
+        getUserProfile: builder.mutation({
             query: (profileId) => ({
                 url: (`/api/user/profile`),
                 method: 'POST',
@@ -161,7 +161,7 @@ export const {
   useSendConnectRequestMutation,
   useGetUserConnectionsQuery,
   useAcceptConnectRequestMutation,
-  useGetUserProfileQuery,
+  useGetUserProfileMutation,
   // Posts
   useGetFeedPostsQuery,
   useAddPostMutation,
