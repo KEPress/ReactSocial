@@ -261,5 +261,4 @@ exports.getUserProfiles = async (request, response, next) => {
         console.error(error)
         response.json({ success: false, message: (error.message) })
     } //end try-catch
-
 }

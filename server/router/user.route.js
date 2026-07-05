@@ -22,6 +22,6 @@ router.post(`/connect`, protect, sendConnectRequest)
 
 router.post(`/accept`, protect, acceptConnectRequests)
 
-router.post(`/profiles`, protect, getUserProfiles)
+router.post(`/profile`, protect, getUserProfiles)
 
 exports.userRoute = router

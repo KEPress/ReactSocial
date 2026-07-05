@@ -1,11 +1,22 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { Eye, MessageSquare } from 'lucide-react'
-import { dummyConnectionsData } from '@assets/assets'
+import { useGetUserConnectionsQuery } from '@store/api/api'
+import { selectToken } from '@store/slices/authorize' 
+import { Loading } from '@components/Loading'
+
 
 export const Messages = () => {
 
   const navigate = useNavigate()
+  const token = useSelector(selectToken)
+
+  const { data, isLoading } = useGetUserConnectionsQuery(token)
+
+  const connections = (data?.connections || (new Array())) 
+
+  if (isLoading) return (<Loading />)
 
   return (<React.Fragment>
             <div className={'min-h-screen relative bg-slate-50'}>
@@ -17,7 +28,7 @@ export const Messages = () => {
                 </div>
                 {/* Connected Users */}
                 <div className={'flex flex-col gap-3'}>
-                  {(dummyConnectionsData.map((user) => 
+                  {(connections?.map((user) => 
                       (<div key={(user._id)} className={'max-w-xl flex flex-wrap gap-5 p-6 bg-white shadow rounded-md'}>
                         <img src={(user.profile_picture)} alt={''} className={'rounded-full size-12 mx-auto'} />
                         <div className={'flex-1'}>

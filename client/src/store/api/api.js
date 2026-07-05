@@ -61,7 +61,7 @@ export const api = createApi({
             invalidatesTags: ['Connection']
         }),
         getUserConnections: builder.query({
-            query: () => (`/api/user/connect`),
+            query: () => (`/api/user/connections`),
             providesTags: ['Connection', 'User']
         }),
         acceptConnectRequest: builder.mutation({
@@ -74,9 +74,11 @@ export const api = createApi({
         }),
         getUserProfile: builder.mutation({
             query: (profileId) => ({
+                // must match router.post('/profile')
                 url: (`/api/user/profile`),
                 method: 'POST',
-                body: ({ id: profileId })
+                // must match const { profileId } = request.body
+                body: ({ profileId })
             })
         }),
         // ── POSTS ─────────────────────────────────────────────────────────────────

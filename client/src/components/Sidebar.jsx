@@ -16,8 +16,6 @@ export const Sidebar = () => {
 
   const user = data?.user
 
-  console.log(data)
-
   const openSidebar = useSelector(selectSidebarOpen)
 
   const navigate = useNavigate(), dispatch = useDispatch()

@@ -1,38 +1,40 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { selectToken } from '@store/slices/authorize'
-import { useGetUserQuery, useGetUserProfileMutation } from '@store/api/api'
+import { selectToken, selectUserId } from '@store/slices/authorize'
+import { useGetUserProfileMutation } from '@store/api/api'
 import { Loading } from '@components/Loading'
 import { UserInfo } from '@components/UserInfo'
 import { Post } from '@components/Post'
 import { ProfileModal } from '@components/Modal'
+import toast from 'react-hot-toast'
 import moment from 'moment';
 
 export const Profile = () => {
 
-   const { userId } = useParams()
+   const { userId: profileId } = useParams()
+
+   // Your authorize slice replaces tutorial's user Redux slice + useAuth getToken
+   const token = useSelector(selectToken)
+   
+   const currentUserId = useSelector(selectUserId)
 
    const [active, setActive] = useState('posts')
 
    const [edit, setEdit] = useState(false)
 
-   const token = useSelector(selectToken)
-
-   // Own profile data — used when no userId param (viewing own profile)
-   const { data: userData, isLoading: userLoading } = useGetUserQuery(undefined, { skip: (!token || (!!userId)) })
-    
-   // Other user's profile data — used when userId param is present (viewing another user's profile)
-   const [getUserProfile, { data: profileData, isLoading: profileLoading }] = useGetUserProfileMutation()
+   // RTK Query mutation to fetch user profile and posts
+   const [getUserProfile, { data, isLoading }] = useGetUserProfileMutation()
 
    useEffect(() => {
-      if (userId && (token)) getUserProfile({ token, profileId: userId })
-   }, [userId, token, getUserProfile])
+      if (!token) return
+      const targetId = (profileId || (currentUserId))
+      if (targetId) getUserProfile(targetId).unwrap().catch((error) => (toast.error(error.Message)))
+   }, [token, profileId, currentUserId, getUserProfile])
+  
+   const user = (data?.profile)
+   const posts = (data?.posts || (new Array()))
 
-   const isLoading = (userId ? (profileLoading) : (userLoading))
-   const user = (userId ? (profileData?.profile) : (userData?.user))
-   const posts = (userId ? (profileData?.posts || (Array())) : (userData?.posts || (Array())))
-   
    return ((!user || (isLoading)) ? (<Loading />):(<React.Fragment>
                      <div className={'relative h-full overflow-y-scroll bg-gray-50 p-6'}>
                         <div className={'max-w-3xl mx-auto'}>
@@ -43,7 +45,7 @@ export const Profile = () => {
                                  {(user.cover_photo && (<img src={(user.cover_photo)} alt={''} className={'w-full h-full object-cover'} />))}
                               </div>    
                               {/* User Info */}
-                              <UserInfo user={(user)} posts={(posts)} userId={(userId)} setEdit={(setEdit)} />  
+                              <UserInfo user={(user)} posts={(posts)} userId={(profileId || (currentUserId))} setEdit={(setEdit)} />  
                            </div>
                            {/* Tabs */}
                            <div className={'mt-6'}>
