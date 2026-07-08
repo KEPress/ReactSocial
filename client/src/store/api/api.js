@@ -29,7 +29,7 @@ export const api = createApi({
             }),
             invalidatesTags: ['User']
         }),
-        discoverUsers: builder.query({
+        discoverUsers: builder.mutation({
             query: (input) => ({
                 url: (`/api/user/discover`),
                 method: 'POST',
@@ -100,7 +100,7 @@ export const api = createApi({
                 method: 'POST',
                 body: ({ postId }) 
             }),
-            async onQueryStarted({ postId }, { dispatch, queryFulfilled, getState }) {
+            async onQueryStarted(postId , { dispatch, queryFulfilled, getState }) {
                 const userId = getState().authorize.userId
                 const patch = dispatch(api.util.updateQueryData('getFeedPosts', undefined, (draft) => {
                     const post = draft.posts.find((post) => (post._id === (postId)))
@@ -157,7 +157,7 @@ export const {
   // User
   useGetUserQuery,
   useUpdateUserMutation,
-  useDiscoverUsersQuery,
+  useDiscoverUsersMutation,
   useFollowUserMutation,
   useUnfollowUserMutation,
   useSendConnectRequestMutation,

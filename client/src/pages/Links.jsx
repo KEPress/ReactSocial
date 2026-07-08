@@ -1,13 +1,36 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import { Users, UserPlus, UserCheck, UserRoundPen, MessageSquare } from 'lucide-react'
-import { dummyConnectionsData as connections, dummyFollowersData as followers, dummyFollowingData as following, dummyPendingConnectionsData as pending } from '@assets/assets'
+import { selectToken } from '@store/slices/authorize'
+import { useGetUserConnectionsQuery, useUnfollowUserMutation, useAcceptConnectRequestMutation } from '@store/api/api'
+import { setLinksActiveTab, selectLinksActiveTab } from '@store/slices/interface'
+import { Loading } from '@components/Loading'
+import toast from 'react-hot-toast'
 
 export const Links = () => {
 
   const navigate = useNavigate()
 
-  const [tab, setTab] = useState('Followers')
+  const dispatch = useDispatch()  
+
+  const token = useSelector(selectToken)
+
+  const activeTab = useSelector(selectLinksActiveTab)
+
+  const { data, isLoading } = useGetUserConnectionsQuery(undefined, { skip: (!token) })
+
+  const [unfollowUser] = useUnfollowUserMutation()
+
+  const [acceptConnectRequest] = useAcceptConnectRequestMutation()
+
+  const connections = (data?.connections || (new Array()))
+
+  const followers = (data?.followers || (new Array()))
+
+  const following = (data?.following || (new Array()))
+
+  const pending = (data?.pending || (new Array()))
 
   const dataArray = [
     ({ label: 'Followers', value: followers, icon: Users }),
@@ -15,6 +38,24 @@ export const Links = () => {
     ({ label: 'Pending', value: pending, icon: UserRoundPen }),
     ({ label: 'Connections', value: connections, icon: UserPlus })
   ]
+
+  const handleUnfollow = async (userId) => {
+      await toast.promise(unfollowUser(userId).unwrap(), ({
+        loading: 'Unfollowing user...',
+        success: 'User unfollowed successfully!',
+        error: (error) => (error.message)
+      }))
+  } //end function
+
+  const handleAccept = async (userId) => {
+     await toast.promise(acceptConnectRequest(userId).unwrap(), ({
+        loading: 'Accepting connection request...',
+        success: 'Connection request accepted!',
+        error: (error) => (error.message)
+      }))
+  }
+   
+  if (isLoading) return (<Loading />)
 
   return (<React.Fragment>
             <div className={'min-h-screen bg-slate-50'}>
@@ -35,7 +76,7 @@ export const Links = () => {
                 {/* Tabs */}
                 <div className={'inline-flex flex-wrap items-center border border-gray-200 rounded-md p-1 bg-white shadow-sm'}>
                   {(dataArray.map((tab) => 
-                      (<button key={(tab.label)} type={'button'} onClick={(() => setTab(tab.label))} className={(`flex items-center px-3 py-1 text-sm rounded-md transition-colors cursor-pointer ${((tab === (tab.label)) ? ('bg-white font-medium text-black'):('text-gray-500 hover:text-black'))}`)}>
+                      (<button key={(tab.label)} type={'button'} onClick={(() => (dispatch(setLinksActiveTab(tab.label))))} className={(`flex items-center px-3 py-1 text-sm rounded-md transition-colors cursor-pointer ${((tab === (tab.label)) ? ('bg-white font-medium text-black'):('text-gray-500 hover:text-black'))}`)}>
                           <tab.icon className={'w-4 h-4'} />
                           <span className={'ml-1'}>{(tab.label)}</span>
                           {(tab.count !== (undefined) && (<span className={'ml-2 text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full'}>{(tab.count)}</span>))}
@@ -44,7 +85,7 @@ export const Links = () => {
                 {/* Connections */}
                 <div className={'flex flex-wrap gap-6 mt-6'}>
                   {(dataArray.find((item) => 
-                    (item.label === (tab))).value.map((user) => 
+                    (item.label === (activeTab))).value.map((user) => 
                     (<div key={(user._id)} className={'w-full max-w-88 flex gap-5 p-6 bg-white shadow rounded-md'}>
                       <img src={(user.profile_picture)} alt={''} className={'rounded-full w-12 h-12 shadow-md mx-auto'} />
                       <div className={'flex-1'}>
@@ -53,9 +94,9 @@ export const Links = () => {
                           <p className={'text-sm text-gray-600'}>@{(user.bio.slice(0, 30))}...</p>
                           <div className={'flex max-sm:flex-col gap-2 mt-4'}>
                             <button type={'button'} onClick={(() => navigate(`/profile/${user._id}`))} className={'w-full p-2 text-sm rounded bg-gradient-to-r from indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition text-white cursor-pointer'}>View Profile</button>
-                            {((tab === ('Following')) && (<button type={'button'} className={'w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer'}>Unfollow</button>))}
-                            {((tab === ('Pending')) && (<button type={'button'} className={'w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer'}>Accept</button>))}
-                            {((tab === ('Connections')) && (<button type={'button'} onClick={(() => navigate(`/messages/${user._id}`))} className={'w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-slate-800 active:scale-95 transition cursor-pointer flex items-center justify-center gap-1'}><MessageSquare className={'w-4 h-4'} />Message</button>))}
+                            {((activeTab === ('Following')) && (<button type={'button'} onClick={(() => (handleUnfollow(user._id)))} className={'w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer'}>Unfollow</button>))}
+                            {((activeTab === ('Pending')) && (<button type={'button'} onClick={(() => (handleAccept(user._id)))} className={'w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-black active:scale-95 transition cursor-pointer'}>Accept</button>))}
+                            {((activeTab === ('Connections')) && (<button type={'button'} onClick={(() => (navigate(`/messages/${user._id}`)))} className={'w-full p-2 text-sm rounded bg-slate-100 hover:bg-slate-200 text-slate-800 active:scale-95 transition cursor-pointer flex items-center justify-center gap-1'}><MessageSquare className={'w-4 h-4'} />Message</button>))}
                           </div>
                       </div>
                     </div>)))}

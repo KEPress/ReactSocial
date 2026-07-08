@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Search } from 'lucide-react'
-import { dummyConnectionsData } from '@assets/assets'
+import { useDiscoverUsersMutation } from '@store/api/api'
 import { UserCards } from '@components/Cards';
 import { Loading } from '@components/Loading'
 
@@ -8,20 +8,12 @@ export const Connect = () => {
 
     const [input, setInput] = useState(String)
 
-    const [users, setUsers] = useState(dummyConnectionsData)
+    const [discoverUsers, { data, isLoading } ] = useDiscoverUsersMutation()
 
-    const [loading, setLoading] = useState(false)
-
+    const users = (data?.users || (new Array()))
 
     const searchHandle = async (event) => {
-      if (event.key === ('Enter')) {
-        setUsers(Array())
-        setLoading(true)
-        setTimeout(() => {
-          setUsers(dummyConnectionsData)
-          setLoading(false)
-        }, 1000)
-      } //end if
+      if (event.key === ('Enter') && (input.trim())) await discoverUsers(input)
     } //end function
 
     return (<React.Fragment>
@@ -38,7 +30,7 @@ export const Connect = () => {
                     <div className={'p-6'}>
                       <div className={'relative'}>
                         <Search className={'absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5'} />
-                        <input type={'text'} value={(input)} onChange={((event) => (setInput(event.target.value)))} placeholder={'Search people by name, username, bio or location...'} className={'pl-10 sm:pl-12 py-2 w-full border border-gray-300 rounded-md max-sm:text-sm'} />
+                        <input type={'text'} value={(input)} onChange={((event) => (setInput(event.target.value)))} onKeyDown={(searchHandle)} placeholder={'Search people by name, username, bio or location...'} className={'pl-10 sm:pl-12 py-2 w-full border border-gray-300 rounded-md max-sm:text-sm'} />
                       </div>
                     </div>
                   </div>
@@ -46,7 +38,7 @@ export const Connect = () => {
                   <div className={'flex flex-wrap gap-6'}>
                     {users.map((user) => (<UserCards user={(user)} key={(user._id)} />))}
                   </div>
-                  {(loading && (<Loading height={'60vh'} />))}
+                  {(isLoading && (<Loading height={'60vh'} />))}
                 </div>
               </div>
            </React.Fragment>)
