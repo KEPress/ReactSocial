@@ -77,7 +77,7 @@ exports.getMessages = async (request, response, next) => {
 
     try {
         const { userId } = getAuth(request)
-        const { to_user_id } = request.body
+        const { to_user_id } = request.query
         const messages = await MessageModel.find({
             $or: [
                 ({ from_user_id: userId, to_user_id: to_user_id }),
