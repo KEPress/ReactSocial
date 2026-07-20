@@ -32,7 +32,6 @@ export const Feed = () => {
             </div>
             <RecentMessages />
           </div>
-         
         </div>
     </React.Fragment>):(<Loading />))
 }
